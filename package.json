@@ -1,0 +1,14 @@
+{
+  "name": "termux-whatsapp-sticker-maker",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@adiwajshing/baileys": "^3.3.0",
+    "datauri": "^3.0.0",
+    "ffmpeg-stream": "^0.7.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "media-converter": "^1.1.7",
+    "webp-converter": "^2.3.1"
+  }
+}
