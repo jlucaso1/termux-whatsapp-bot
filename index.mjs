@@ -13,9 +13,9 @@ async function connectToWhatsApp() {
   const creds = conn.base64EncodedAuthInfo();
   fs.writeFileSync("./auth_info.json", JSON.stringify(creds, null, "\t"));
   conn.on("message-update", async (m) => {
+    console.log(m)
     const messageType = Object.keys(m.message)[0];
     if (messageType == MessageType.image) {
-      console.log(m);
       let image = await conn.downloadMediaMessage(m);
       let sticker = await webp.buffer2webpbuffer(image);
       conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
@@ -26,7 +26,7 @@ async function connectToWhatsApp() {
         endTime: `00:00:05.0`,
         loop: 0,
       };
-      let tempFile = "aaa.webp"
+      let tempFile = `${Math.floor(Math.random() * 1000)}.webp`;
       let stream = new str.Readable();
       let file = await conn.downloadMediaMessage(m);
       stream.push(
@@ -36,18 +36,14 @@ async function connectToWhatsApp() {
       );
       stream.push(null);
       await new Promise((resolve, reject) => {
-        ffmpeg(stream)
+        var command = ffmpeg(stream)
           .inputFormat("mp4")
-          .on("start", function (cmd) {
-            console.log("Started " + cmd);
+          .on("start", () => {
+            console.log("Started Enconding");
           })
           .on("error", function (err) {
             console.log("An error occurred: " + err.message);
             reject(err);
-          })
-          .on("end", function () {
-            console.log("Finished encoding");
-            resolve(true);
           })
           .addOutputOptions([
             `-vcodec`,
@@ -69,12 +65,16 @@ async function connectToWhatsApp() {
             `512:512`,
           ])
           .toFormat("webp")
-          .save(tempFile);
+          .on("end", () => {
+            console.log("Finished Enconding");
+            resolve(true);
+          })
+          .save("temp/" + tempFile);
       });
-      const d = await datauri(tempFile);
-      fs.unlinkSync(tempFile);
-      return d;
-      // conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
+      var bufferwebp = await fs.readFileSync("temp/" + tempFile);
+      fs.unlinkSync("temp/" + tempFile);
+      console.log("Sending sticker to: ")
+      conn.sendMessage(m.key.remoteJid, bufferwebp, MessageType.sticker);
     }
   });
 }

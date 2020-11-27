@@ -3,7 +3,7 @@ module.exports = {
     {
       script: "index.mjs",
       watch: ".",
-      ignore_watch: ["node_modules", "auth_info.json"],
+      ignore_watch: ["node_modules", "auth_info.json", "temp"],
     },
   ],
 
