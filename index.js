@@ -61,8 +61,8 @@ async function connectToWhatsApp() {
       };
       let tempFile = `${Math.floor(Math.random() * 100000)}.webp`;
       let videoBuffer = await conn.downloadMediaMessage(m);
-      const videoStream = streamifier.createReadStream(videoBuffer);
-      await new Promise((resolve, reject) => {
+      const videoStream = await streamifier.createReadStream(videoBuffer);
+      let success = await new Promise((resolve, reject) => {
         var command = ffmpeg(videoStream)
           .inputFormat("mp4")
           .on("error", function (err) {
@@ -94,6 +94,10 @@ async function connectToWhatsApp() {
           })
           .save("temp/" + tempFile);
       });
+      if (!success) {
+        console.log("Erro ao processar o video");
+        return;
+      }
       var bufferwebp = await fs.readFileSync("temp/" + tempFile);
       fs.unlinkSync("temp/" + tempFile);
       await conn.sendMessage(m.key.remoteJid, bufferwebp, MessageType.sticker);
@@ -107,7 +111,7 @@ async function connectToWhatsApp() {
         `https://api.fdci.se/rep.php?gambar=${search}`
       );
       if (!data) {
-        conn.sendMessage(m.key.remoteJid);
+        console.log("No data from: " + search);
         return;
       }
       let response = await Axios.get(
@@ -116,6 +120,7 @@ async function connectToWhatsApp() {
           responseType: "arraybuffer",
         }
       );
+      if (!response.data) return;
       await conn.sendMessage(
         m.key.remoteJid,
         response.data,
