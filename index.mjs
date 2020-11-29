@@ -1,33 +1,57 @@
 import fs from "fs";
 import baileys from "@adiwajshing/baileys";
 import ffmpeg from "fluent-ffmpeg";
-import webp from "webp-converter";
+import sharp from "sharp";
 import str from "stream";
 import Axios from "axios";
-const { WAConnection, MessageType, MessageOptions, Mimetype } = baileys;
+const {
+  WAConnection,
+  MessageType,
+  ReconnectMode,
+  waChatKey,
+  WA_MESSAGE_STUB_TYPES,
+  decodeMediaMessageBuffer,
+} = baileys;
 async function connectToWhatsApp() {
-  const conn = new WAConnection();
-  try {
-    conn.loadAuthInfo("./auth_info.json");
-  } catch (error) {}
-  await conn.connect({ timeoutMs: 30 * 1000 });
-  const creds = conn.base64EncodedAuthInfo();
-  fs.writeFileSync("./auth_info.json", JSON.stringify(creds, null, "\t"));
+  const conn = new WAConnection(); // instantiate
+  conn.autoReconnect = ReconnectMode.onConnectionLost; // only automatically reconnect when the connection breaks
+  conn.logger.level = "fatal"; // set to 'debug' to see what kind of stuff you can implement
+  // attempt to reconnect at most 10 times in a row
+  conn.connectOptions.maxRetries = 10;
+  conn.chatOrderingKey = waChatKey(true); // order chats such that pinned chats are on top
+  conn.on("credentials-updated", () => {
+    console.log(`credentials updated`);
+    const authInfo = conn.base64EncodedAuthInfo(); // get all the auth info we need to restore this session
+    fs.writeFileSync("./auth_info.json", JSON.stringify(authInfo, null, "\t")); // save this info to a file
+  });
+  fs.existsSync("./auth_info.json") && conn.loadAuthInfo("./auth_info.json");
+  await conn.connect();
+
   conn.on("message-new", async (m) => {
-    if (!m.message) return;
-    handleCommand(m);
+    // if (!m.message) return;
+    // handleCommand(m);
+  });
+  conn.on("chat-update", async (chatUpdate) => {
+    if (chatUpdate.messages) {
+      let m = chatUpdate.messages.all()[0];
+      if (!m.message) return;
+      handleCommand(m);
+    }
   });
   async function handleCommand(m) {
     const messageType = Object.keys(m.message)[0];
     if (
       messageType == MessageType.image &&
+      m.message.imageMessage.url &&
       m.message.imageMessage.caption == "/sticker"
     ) {
       let image = await conn.downloadMediaMessage(m);
-      let sticker = await webp.buffer2webpbuffer(image);
-      conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
+      let sticker = await sharp(image).resize(512, 512).webp().toBuffer();
+      await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
+      console.log("Sticker Image sent to: " + m.key.remoteJid);
     } else if (
       messageType == MessageType.video &&
+      m.message.videoMessage.url &&
       m.message.videoMessage.caption == "/sticker"
     ) {
       let processOptions = {
@@ -83,24 +107,42 @@ async function connectToWhatsApp() {
       });
       var bufferwebp = await fs.readFileSync("temp/" + tempFile);
       fs.unlinkSync("temp/" + tempFile);
-      console.log("Sending sticker to: ");
-      conn.sendMessage(m.key.remoteJid, bufferwebp, MessageType.sticker);
+      await conn.sendMessage(m.key.remoteJid, bufferwebp, MessageType.sticker);
+      console.log("Sticker Animated sent to: " + m.key.remoteJid);
     } else if (
       m.message.conversation &&
       m.message.conversation.startsWith("/imagem")
     ) {
       let search = m.message.conversation.split(" ")[1];
-      let { data } = await Axios.get(`https://api.fdci.se/rep.php?gambar=${search}`);
+      let { data } = await Axios.get(
+        `https://api.fdci.se/rep.php?gambar=${search}`
+      );
       if (!data) {
         conn.sendMessage(m.key.remoteJid);
         return;
       }
-      let response = await Axios.get(data[Math.floor(Math.random() * data.length)], {
-        responseType: "arraybuffer",
-      })
-      conn.sendMessage(m.key.remoteJid, response.data, MessageType.image, {caption: "gatosgatocatcats".includes(search) ? "Miau": null})
+      let response = await Axios.get(
+        data[Math.floor(Math.random() * data.length)],
+        {
+          responseType: "arraybuffer",
+        }
+      );
+      await conn.sendMessage(
+        m.key.remoteJid,
+        response.data,
+        MessageType.image,
+        {
+          caption: "gatosgatocatcats".includes(search) ? "Miau" : null,
+        }
+      );
+      console.log("Random Image sent to: " + m.key.remoteJid);
     }
   }
+  conn.on("close", ({ reason, isReconnecting }) =>
+    console.log(
+      "oh no got disconnected: " + reason + ", reconnecting: " + isReconnecting
+    )
+  );
 }
 
 connectToWhatsApp().catch((err) => console.log("unexpected error: " + err));

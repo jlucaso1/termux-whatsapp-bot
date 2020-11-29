@@ -10,6 +10,6 @@
     "ffmpeg-stream": "^0.7.0",
     "fluent-ffmpeg": "^2.1.2",
     "media-converter": "^1.1.7",
-    "webp-converter": "^2.3.1"
+    "sharp": "^0.26.3"
   }
 }
