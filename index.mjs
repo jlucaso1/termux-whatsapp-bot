@@ -2,7 +2,7 @@ import fs from "fs";
 import baileys from "@adiwajshing/baileys";
 import ffmpeg from "fluent-ffmpeg";
 import sharp from "sharp";
-import str from "stream";
+import streamifier from "streamifier";
 import Axios from "axios";
 const {
   WAConnection,
@@ -60,21 +60,12 @@ async function connectToWhatsApp() {
         endTime: `00:00:05.0`,
         loop: 0,
       };
-      let tempFile = `${Math.floor(Math.random() * 1000)}.webp`;
-      let stream = new str.Readable();
-      let file = await conn.downloadMediaMessage(m);
-      stream.push(
-        Buffer.isBuffer(file)
-          ? file
-          : Buffer.from(file.replace("data:video/mp4;base64,", ""), "base64")
-      );
-      stream.push(null);
+      let tempFile = `${Math.floor(Math.random() * 100000)}.webp`;
+      let videoBuffer = await conn.downloadMediaMessage(m);
+      const videoStream = streamifier.createReadStream(videoBuffer);
       await new Promise((resolve, reject) => {
-        var command = ffmpeg(stream)
+        var command = ffmpeg(videoStream)
           .inputFormat("mp4")
-          .on("start", () => {
-            console.log("Started Enconding");
-          })
           .on("error", function (err) {
             console.log("An error occurred: " + err.message);
             reject(err);
@@ -100,7 +91,6 @@ async function connectToWhatsApp() {
           ])
           .toFormat("webp")
           .on("end", () => {
-            console.log("Finished Enconding");
             resolve(true);
           })
           .save("temp/" + tempFile);

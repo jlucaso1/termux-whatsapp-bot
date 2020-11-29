@@ -6,10 +6,8 @@
   "dependencies": {
     "@adiwajshing/baileys": "^3.3.0",
     "axios": "^0.21.0",
-    "datauri": "^3.0.0",
-    "ffmpeg-stream": "^0.7.0",
     "fluent-ffmpeg": "^2.1.2",
-    "media-converter": "^1.1.7",
-    "sharp": "^0.26.3"
+    "sharp": "^0.26.3",
+    "streamifier": "^0.1.1"
   }
 }
