@@ -69,6 +69,9 @@ async function connectToWhatsApp() {
             console.log("An error occurred: " + err.message);
             reject(err);
           })
+          .on("start", function (cmd) {
+            console.log("Started " + cmd);
+          })
           .addOutputOptions([
             `-vcodec`,
             `libwebp`,
