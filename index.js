@@ -3,17 +3,14 @@ const {
   WAConnection,
   MessageType,
   ReconnectMode,
-  waChatKey,
-  WA_MESSAGE_STUB_TYPES,
-  decodeMediaMessageBuffer,
 } = require("@adiwajshing/baileys");
 const ffmpeg = require("fluent-ffmpeg");
-const sharp = require("sharp");
 const streamifier = require("streamifier");
 const Axios = require("axios");
 const Crypto = require("crypto");
 const { tmpdir } = require("os");
 const path = require("path");
+const imageminWebp = require("imagemin-webp");
 
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
@@ -21,19 +18,13 @@ async function connectToWhatsApp() {
   conn.logger.level = "fatal"; // set to 'debug' to see what kind of stuff you can implement
   // attempt to reconnect at most 10 times in a row
   conn.connectOptions.maxRetries = 10;
-  conn.chatOrderingKey = waChatKey(true); // order chats such that pinned chats are on top
   conn.on("credentials-updated", () => {
-    console.log(`credentials updated`);
+    console.log("credentials updated");
     const authInfo = conn.base64EncodedAuthInfo(); // get all the auth info we need to restore this session
     fs.writeFileSync("./auth_info.json", JSON.stringify(authInfo, null, "\t")); // save this info to a file
   });
   fs.existsSync("./auth_info.json") && conn.loadAuthInfo("./auth_info.json");
   await conn.connect();
-
-  conn.on("message-new", async (m) => {
-    // if (!m.message) return;
-    // handleCommand(m);
-  });
   conn.on("chat-update", async (chatUpdate) => {
     if (chatUpdate.messages) {
       let m = chatUpdate.messages.all()[0];
@@ -48,8 +39,8 @@ async function connectToWhatsApp() {
       m.message.imageMessage.url &&
       m.message.imageMessage.caption == "/sticker"
     ) {
-      let image = await conn.downloadMediaMessage(m);
-      let sticker = await sharp(image).resize(512, 512).webp().toBuffer();
+      let imageBuffer = await conn.downloadMediaMessage(m);
+      let sticker = await imageminWebp({ preset: "icon" })(imageBuffer);
       await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
       console.log("Sticker Image sent to: " + m.key.remoteJid);
     } else if (
@@ -131,6 +122,12 @@ async function connectToWhatsApp() {
         }
       );
       if (!response.data) return;
+      if (m.message.conversation.split(" ")[2]) {
+        let sticker = await imageminWebp({ preset: "icon" })(response.data);
+        await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
+        console.log("Sticker Image Random sent to: " + m.key.remoteJid);
+        return;
+      }
       await conn.sendMessage(
         m.key.remoteJid,
         response.data,
