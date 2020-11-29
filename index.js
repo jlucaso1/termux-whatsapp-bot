@@ -11,6 +11,10 @@ const ffmpeg = require("fluent-ffmpeg");
 const sharp = require("sharp");
 const streamifier = require("streamifier");
 const Axios = require("axios");
+const Crypto = require("crypto");
+const { tmpdir } = require("os");
+const path = require("path");
+
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
   conn.autoReconnect = ReconnectMode.onConnectionLost; // only automatically reconnect when the connection breaks
@@ -59,7 +63,10 @@ async function connectToWhatsApp() {
         endTime: `00:00:05.0`,
         loop: 0,
       };
-      let tempFile = `${Math.floor(Math.random() * 100000)}.webp`;
+      const tempFile = path.join(
+        tmpdir(),
+        `processing.${Crypto.randomBytes(6).readUIntLE(0, 6).toString(36)}.webp`
+      );
       let videoBuffer = await conn.downloadMediaMessage(m);
       const videoStream = await streamifier.createReadStream(videoBuffer);
       let success = await new Promise((resolve, reject) => {
@@ -95,14 +102,14 @@ async function connectToWhatsApp() {
           .on("end", () => {
             resolve(true);
           })
-          .saveToFile("temp/" + tempFile);
+          .saveToFile(tempFile);
       });
       if (!success) {
         console.log("Erro ao processar o video");
         return;
       }
-      var bufferwebp = await fs.readFileSync("temp/" + tempFile);
-      fs.unlinkSync("temp/" + tempFile);
+      var bufferwebp = await fs.readFileSync(tempFile);
+      await fs.unlinkSync(tempFile);
       await conn.sendMessage(m.key.remoteJid, bufferwebp, MessageType.sticker);
       console.log("Sticker Animated sent to: " + m.key.remoteJid);
     } else if (
