@@ -1,9 +1,4 @@
-import fs from "fs";
-import baileys from "@adiwajshing/baileys";
-import ffmpeg from "fluent-ffmpeg";
-import sharp from "sharp";
-import streamifier from "streamifier";
-import Axios from "axios";
+const fs = require("fs");
 const {
   WAConnection,
   MessageType,
@@ -11,7 +6,11 @@ const {
   waChatKey,
   WA_MESSAGE_STUB_TYPES,
   decodeMediaMessageBuffer,
-} = baileys;
+} = require("@adiwajshing/baileys");
+const ffmpeg = require("fluent-ffmpeg");
+const sharp = require("sharp");
+const streamifier = require("streamifier");
+const Axios = require("axios");
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
   conn.autoReconnect = ReconnectMode.onConnectionLost; // only automatically reconnect when the connection breaks
