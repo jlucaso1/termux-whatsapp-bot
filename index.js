@@ -92,7 +92,7 @@ async function connectToWhatsApp() {
           .on("end", () => {
             resolve(true);
           })
-          .save("temp/" + tempFile);
+          .saveToFile("temp/" + tempFile);
       });
       if (!success) {
         console.log("Erro ao processar o video");
