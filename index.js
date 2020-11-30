@@ -107,9 +107,15 @@ async function connectToWhatsApp() {
       m.message.conversation &&
       m.message.conversation.startsWith("/imagem")
     ) {
-      let search = m.message.conversation.split(" ")[1];
+      let message = m.message.conversation.replace("/imagem", "").trim();
+      let isSticker = false;
+      if (message.includes("sticker")) {
+        isSticker = true;
+        message = message.replace("sticker", "").trim();
+      }
+      let search = message;
       let { data } = await Axios.get(
-        `https://api.fdci.se/rep.php?gambar=${search}`
+        encodeURI(`https://api.fdci.se/rep.php?gambar=${search}`)
       );
       if (!data) {
         console.log("No data from: " + search);
@@ -122,20 +128,13 @@ async function connectToWhatsApp() {
         }
       );
       if (!response.data) return;
-      if (m.message.conversation.split(" ")[2]) {
+      if (isSticker) {
         let sticker = await imageminWebp({ preset: "icon" })(response.data);
         await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
         console.log("Sticker Image Random sent to: " + m.key.remoteJid);
         return;
       }
-      await conn.sendMessage(
-        m.key.remoteJid,
-        response.data,
-        MessageType.image,
-        {
-          caption: "gatosgatocatcats".includes(search) ? "Miau" : null,
-        }
-      );
+      await conn.sendMessage(m.key.remoteJid, response.data, MessageType.image);
       console.log("Random Image sent to: " + m.key.remoteJid);
     }
   }

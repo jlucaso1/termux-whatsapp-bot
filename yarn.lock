@@ -3,9 +3,9 @@
 
 
 "@adiwajshing/baileys@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@adiwajshing/baileys/-/baileys-3.3.0.tgz#29148cd77846e164b36a1c4be0f9240a2e7e0065"
-  integrity sha512-31V1LmqaQhGe7LL9NbWn50Fyp/N31RAdKe6mxXGrEoYA2oYsS2kf8+gIRHXeiy1A6mNltxlJQY+pMMIjJ19WNg==
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/@adiwajshing/baileys/-/baileys-3.3.1.tgz#7274577b4b803753f4285c881a71c2910820c360"
+  integrity sha512-IzmLGpeMGdwMV5P7UE4FPx/1tpUyYyQ4c7gi4tJwTD0AgSsx6as2VBtVNUT+aa12Ne46YgXbSskkspTDapMVPg==
   dependencies:
     "@adiwajshing/keyed-db" "^0.1.8"
     curve25519-js "^0.0.4"
