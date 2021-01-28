@@ -10,7 +10,7 @@ const Axios = require("axios");
 const Crypto = require("crypto");
 const { tmpdir } = require("os");
 const path = require("path");
-const webp = require("webp-simple-converter");
+const webp = require("webp-converter");
 
 // this will grant 755 permission to webp executables
 webp.grant_permission();

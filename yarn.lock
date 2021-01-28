@@ -1059,10 +1059,10 @@ util-deprecate@^1.0.1:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-webp-simple-converter@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/webp-simple-converter/-/webp-simple-converter-0.0.6.tgz#77879087164030a0b77ae3830f37a9d172ac9d5f"
-  integrity sha512-FKEeOJPIFgGt1zP1rLAhdePyr38C8FsqEJHUWMB3QOksgx4Q0VhAABt9Va6UJbNGtXT2iNEAMEhoygx1A3fo9Q==
+webp-converter@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/webp-converter/-/webp-converter-2.3.1.tgz#394bbe0014634a46821c78bf126156e76a5e5b62"
+  integrity sha512-9Ql646Ha9+WiwtE1gGL3UlW+lQNscVXVoyQdThqpgSoi0WfyuqhParlbu5iOHFYWUimTYCOIwVYBZcDMAJfQ8A==
 
 which@^1.1.1:
   version "1.3.1"
