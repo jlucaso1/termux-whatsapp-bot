@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { exec, execFile } = require("child_process");
+const { execFile } = require("child_process");
 const {
   WAConnection,
   MessageType,

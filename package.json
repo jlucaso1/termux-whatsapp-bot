@@ -6,10 +6,8 @@
   "dependencies": {
     "@adiwajshing/baileys": "^3.4.1",
     "axios": "^0.21.1",
-    "cwebp": "^2.0.5",
+    "cwebp-bin": "^6.1.1",
     "fluent-ffmpeg": "^2.1.2",
-    "imagemin-webp": "^6.0.0",
-    "streamifier": "^0.1.1",
-    "webp-converter": "^2.3.1"
+    "streamifier": "^0.1.1"
   }
 }
