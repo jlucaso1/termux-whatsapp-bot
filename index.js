@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { execFile } = require("child_process");
+const { exec } = require("child_process");
 const {
   WAConnection,
   MessageType,
@@ -11,7 +11,6 @@ const Axios = require("axios");
 const Crypto = require("crypto");
 const { tmpdir } = require("os");
 const path = require("path");
-const cwebp = require("cwebp-bin");
 
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
@@ -43,7 +42,7 @@ async function connectToWhatsApp() {
       let webpPath = imagePath.replace(/\.[^.]*$/, ".webp");
       console.log(webpPath);
       await new Promise((resolve, reject) => {
-        execFile(cwebp, [imagePath, "-o", webpPath], (err) => {
+        exec(`cwebp ${imagePath} -o ${webpPath}`, (err) => {
           if (err) {
             throw err;
           }

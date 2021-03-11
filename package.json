@@ -6,7 +6,6 @@
   "dependencies": {
     "@adiwajshing/baileys": "^3.4.1",
     "axios": "^0.21.1",
-    "cwebp-bin": "^6.1.1",
     "fluent-ffmpeg": "^2.1.2",
     "streamifier": "^0.1.1"
   }
