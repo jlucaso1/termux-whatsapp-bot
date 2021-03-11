@@ -10,16 +10,12 @@ const Axios = require("axios");
 const Crypto = require("crypto");
 const { tmpdir } = require("os");
 const path = require("path");
-const webp = require("webp-converter");
-
-// this will grant 755 permission to webp executables
-webp.grant_permission();
+const imageminWebp = require("imagemin-webp");
 
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
   conn.autoReconnect = ReconnectMode.onConnectionLost; // only automatically reconnect when the connection breaks
-  conn.logger.level = "fatal"; // set to 'debug' to see what kind of stuff you can implement
-  // attempt to reconnect at most 10 times in a row
+  conn.logger.level = "fatal";
   conn.connectOptions.maxRetries = 10;
   conn.on("credentials-updated", () => {
     console.log("credentials updated");
@@ -43,7 +39,7 @@ async function connectToWhatsApp() {
       m.message.imageMessage.caption == "/sticker"
     ) {
       let imageBuffer = await conn.downloadMediaMessage(m);
-      let sticker = await webp.buffer2webpbuffer(imageBuffer);
+      let sticker = await imageminWebp({ preset: "icon" })(imageBuffer);
       await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
       console.log("Sticker Image sent to: " + m.key.remoteJid);
     } else if (
