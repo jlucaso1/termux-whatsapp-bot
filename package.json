@@ -4,10 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@adiwajshing/baileys": "^3.3.0",
-    "axios": "^0.21.0",
+    "@adiwajshing/baileys": "^3.4.1",
+    "axios": "^0.21.1",
     "fluent-ffmpeg": "^2.1.2",
-    "imagemin-webp": "^6.0.0",
-    "streamifier": "^0.1.1"
+    "streamifier": "^0.1.1",
+    "webp-converter": "^2.3.1"
   }
 }

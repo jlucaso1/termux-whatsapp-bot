@@ -10,7 +10,10 @@ const Axios = require("axios");
 const Crypto = require("crypto");
 const { tmpdir } = require("os");
 const path = require("path");
-const imageminWebp = require("imagemin-webp");
+const webp = require("webp-converter");
+
+// this will grant 755 permission to webp executables
+webp.grant_permission();
 
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
@@ -40,7 +43,7 @@ async function connectToWhatsApp() {
       m.message.imageMessage.caption == "/sticker"
     ) {
       let imageBuffer = await conn.downloadMediaMessage(m);
-      let sticker = await imageminWebp({ preset: "icon" })(imageBuffer);
+      let sticker = await webp.buffer2webpbuffer(imageBuffer);
       await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
       console.log("Sticker Image sent to: " + m.key.remoteJid);
     } else if (
