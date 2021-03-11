@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { exec, execFile } = require("child_process");
 const {
   WAConnection,
   MessageType,
@@ -10,7 +11,7 @@ const Axios = require("axios");
 const Crypto = require("crypto");
 const { tmpdir } = require("os");
 const path = require("path");
-const imageminWebp = require("imagemin-webp");
+const cwebp = require("cwebp-bin");
 
 async function connectToWhatsApp() {
   const conn = new WAConnection(); // instantiate
@@ -38,10 +39,21 @@ async function connectToWhatsApp() {
       m.message.imageMessage.url &&
       m.message.imageMessage.caption == "/sticker"
     ) {
-      let imageBuffer = await conn.downloadMediaMessage(m);
-      let sticker = await imageminWebp({ preset: "icon" })(imageBuffer);
-      await conn.sendMessage(m.key.remoteJid, sticker, MessageType.sticker);
-      console.log("Sticker Image sent to: " + m.key.remoteJid);
+      let imagePath = await conn.downloadAndSaveMediaMessage(m, Date.now());
+      let webpPath = imagePath.replace(/\.[^.]*$/, ".webp");
+      console.log(webpPath);
+      await new Promise((resolve, reject) => {
+        execFile(cwebp, [imagePath, "-o", webpPath], (err) => {
+          if (err) {
+            throw err;
+          }
+          resolve();
+        });
+      });
+      let buffer = await fs.readFileSync(webpPath);
+      fs.unlinkSync(imagePath);
+      fs.unlinkSync(webpPath);
+      await conn.sendMessage(m.key.remoteJid, buffer, MessageType.sticker);
     } else if (
       messageType == MessageType.video &&
       m.message.videoMessage.url &&
